@@ -56,6 +56,7 @@ docker run -d \
   -e REDISEARCH_ARGS="MAXEXPANSIONS 200" \
   -e REDISJSON_ARGS="DEBUG MEMORY" \
   -p 6379:6379 \
+  -v /var/redis:/data \
   --network nansan-network \
   redis:latest
 
