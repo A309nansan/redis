@@ -6,4 +6,18 @@ USER root
 ENV TZ=Asia/Seoul
 RUN ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && echo $TZ > /etc/timezone
 
+# 패키지 리스트 업데이트 및 gnome-keyring 설치 (Alpine Linux)
+RUN apk add --no-cache \
+    gnome-keyring \
+    dbus \
+    && rm -rf /var/lib/apt/lists/*
+
 USER node
+
+# gnome-keyring 활성화를 위한 환경 변수 설정
+ENV DBUS_SESSION_BUS_ADDRESS="unix:path=/run/user/1000/bus"
+ENV GNOME_KEYRING_CONTROL="/run/user/1000/keyring"
+ENV GNOME_KEYRING_PID=1
+
+# 기존 entrypoint를 유지하면서 gnome-keyring 실행
+ENTRYPOINT ["/bin/sh", "-c", "gnome-keyring-daemon --start; exec ./docker-entry.sh node redisinsight/api/dist/src/main"]
