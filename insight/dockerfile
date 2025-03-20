@@ -15,7 +15,7 @@ RUN apk add --no-cache \
 
 # gnome-keyring 활성화를 위한 환경 변수 설정
 ENV DBUS_SESSION_BUS_ADDRESS="unix:path=/run/dbus/system_bus_socket"
-ENV GNOME_KEYRING_CONTROL="/home/node/.cache/keyring"
+ENV GNOME_KEYRING_CONTROL="/root/.cache/keyring"
 ENV GNOME_KEYRING_PID=1
 
 # 기존 entrypoint를 유지하면서 gnome-keyring 실행
