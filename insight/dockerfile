@@ -10,14 +10,15 @@ RUN ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && echo $TZ > /etc/timezone
 RUN apk add --no-cache \
     gnome-keyring \
     dbus \
+    dbus-x11 \
     && rm -rf /var/lib/apt/lists/*
 
 USER node
 
 # gnome-keyring 활성화를 위한 환경 변수 설정
-ENV DBUS_SESSION_BUS_ADDRESS="unix:path=/run/user/1000/bus"
-ENV GNOME_KEYRING_CONTROL="/run/user/1000/keyring"
+ENV DBUS_SESSION_BUS_ADDRESS="unix:path=/run/dbus/system_bus_socket"
+ENV GNOME_KEYRING_CONTROL="/home/node/.cache/keyring"
 ENV GNOME_KEYRING_PID=1
 
 # 기존 entrypoint를 유지하면서 gnome-keyring 실행
-ENTRYPOINT ["/bin/sh", "-c", "gnome-keyring-daemon --start; exec ./docker-entry.sh node redisinsight/api/dist/src/main"]
+ENTRYPOINT ["/bin/sh", "-c", "mkdir -p /run/dbus && dbus-daemon --system; gnome-keyring-daemon --start; exec ./docker-entry.sh node redisinsight/api/dist/src/main"]
