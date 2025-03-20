@@ -54,7 +54,7 @@ log "Execute insight..."
 docker run -d \
   --name insight \
   --restart unless-stopped \
-  -p 8084:8001 \
+  -p 8084:5540 \
   -e REDISINSIGHT_AUTH=true \
   -e REDISINSIGHT_USER=${REDISINSIGHT_USER} \
   -e REDISINSIGHT_PASSWORD=${REDISINSIGHT_PASSWORD} \
