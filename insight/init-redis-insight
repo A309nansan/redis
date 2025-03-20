@@ -26,12 +26,12 @@ log "Docker network named 'nansan-network' is creating..."
 docker network create --driver bridge nansan-network
 fi
 
-cd redis || { echo "디렉토리 변경 실패"; exit 1; }
+cd insight || { echo "디렉토리 변경 실패"; exit 1; }
 
 # 기존 redis 이미지를 삭제하고 새로 빌드
-log "redis image remove and build."
-docker rmi redis:latest || true
-docker build -t redis:latest .
+log "insight image remove and build."
+docker rmi insight:latest || true
+docker build -t insight:latest .
 
 # 필요한 환경변수를 Vault에서 가져오기
 log "Get credential data from vault..."
@@ -45,18 +45,20 @@ CLIENT_TOKEN=$(echo "$TOKEN_RESPONSES" | jq -r '.auth.client_token')
 SECRET_RESPONSE=$(curl -s --header "X-Vault-Token: ${CLIENT_TOKEN}" \
 --request GET https://vault.nansan.site/v1/kv/data/auth)
 
-REDIS_PASSWORD=$(echo "$SECRET_RESPONSE" | jq -r '.data.data.redis.password')
+REDISINSIGHT_USER=$(echo "$SECRET_RESPONSE" | jq -r '.data.data.insight.username')
+REDISINSIGHT_PASSWORD=$(echo "$SECRET_RESPONSE" | jq -r '.data.data.insight.password')
 
-# Docker로 redis 서비스 실행
-log "Execute redis..."
+# Docker로 insight 서비스 실행
+log "Execute insight..."
 docker run -d \
-  --name redis \
+  --name insight \
   --restart unless-stopped \
-  -e REDIS_ARGS="--requirepass ${REDIS_PASSWORD}" \
-  -e REDISEARCH_ARGS="MAXEXPANSIONS 200" \
-  -e REDISJSON_ARGS="DEBUG MEMORY" \
-  -v /var/redis:/data \
+  -p 8084:8001 \
+  -e REDISINSIGHT_AUTH=true \
+  -e REDISINSIGHT_USER=${REDISINSIGHT_USER} \
+  -e REDISINSIGHT_PASSWORD=${REDISINSIGHT_PASSWORD} \
+  -v /var/insight:/data \
   --network nansan-network \
-  redis:latest
+  insight:latest
 
 echo "작업이 완료되었습니다."
