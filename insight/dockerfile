@@ -13,10 +13,19 @@ RUN apk add --no-cache \
     dbus-x11 \
     && rm -rf /var/lib/apt/lists/*
 
+# DBus 정책 파일 추가 (org.gnome.keyring 허용)
+RUN echo '<!DOCTYPE busconfig PUBLIC "-//freedesktop//DTD D-Bus Bus Configuration 1.0//EN" "http://www.freedesktop.org/standards/dbus/1.0/busconfig.dtd">
+<busconfig>
+    <policy user="root">
+        <allow own="org.gnome.keyring"/>
+        <allow send_destination="org.gnome.keyring"/>
+    </policy>
+</busconfig>' > /etc/dbus-1/session.d/gnome-keyring.conf
+
 # gnome-keyring 활성화를 위한 환경 변수 설정
 ENV DBUS_SESSION_BUS_ADDRESS="unix:path=/run/dbus/system_bus_socket"
 ENV GNOME_KEYRING_CONTROL="/root/.cache/keyring"
 ENV GNOME_KEYRING_PID=1
 
 # 기존 entrypoint를 유지하면서 gnome-keyring 실행
-ENTRYPOINT ["/bin/sh", "-c", "dbus-daemon --session --fork --config-file=/dev/null && gnome-keyring-daemon --start; exec ./docker-entry.sh node redisinsight/api/dist/src/main"]
+ENTRYPOINT ["/bin/sh", "-c", "mkdir -p /run/dbus && dbus-daemon --session --fork && gnome-keyring-daemon --start; exec ./docker-entry.sh node redisinsight/api/dist/src/main"]
