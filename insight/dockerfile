@@ -19,4 +19,4 @@ ENV GNOME_KEYRING_CONTROL="/home/node/.cache/keyring"
 ENV GNOME_KEYRING_PID=1
 
 # 기존 entrypoint를 유지하면서 gnome-keyring 실행
-ENTRYPOINT ["/bin/sh", "-c", "mkdir -p /run/dbus && dbus-daemon --system; gnome-keyring-daemon --start; exec ./docker-entry.sh node redisinsight/api/dist/src/main"]
+ENTRYPOINT ["/bin/sh", "-c", "dbus-daemon --session --fork --config-file=/dev/null && gnome-keyring-daemon --start; exec ./docker-entry.sh node redisinsight/api/dist/src/main"]
