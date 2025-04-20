@@ -28,6 +28,10 @@ fi
 
 cd redis || { echo "디렉토리 변경 실패"; exit 1; }
 
+# 실행중인 redis container 삭제
+log "redis container remove."
+docker rm -f redis
+
 # 기존 redis 이미지를 삭제하고 새로 빌드
 log "redis image remove and build."
 docker rmi redis:latest || true
@@ -43,7 +47,7 @@ https://vault.nansan.site/v1/auth/approle/login)
 CLIENT_TOKEN=$(echo "$TOKEN_RESPONSES" | jq -r '.auth.client_token')
 
 SECRET_RESPONSE=$(curl -s --header "X-Vault-Token: ${CLIENT_TOKEN}" \
---request GET https://vault.nansan.site/v1/kv/data/auth)
+--request GET https://vault.nansan.site/v1/kv/data/authentication)
 
 REDIS_PASSWORD=$(echo "$SECRET_RESPONSE" | jq -r '.data.data.redis.password')
 
@@ -52,10 +56,10 @@ log "Execute redis..."
 docker run -d \
   --name redis \
   --restart unless-stopped \
+  -v /var/redis:/data \
   -e REDIS_ARGS="--requirepass ${REDIS_PASSWORD}" \
   -e REDISEARCH_ARGS="MAXEXPANSIONS 200" \
   -e REDISJSON_ARGS="DEBUG MEMORY" \
-  -v /var/redis:/data \
   --network nansan-network \
   redis:latest
 
