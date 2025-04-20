@@ -28,7 +28,11 @@ fi
 
 cd insight || { echo "디렉토리 변경 실패"; exit 1; }
 
-# 기존 redis 이미지를 삭제하고 새로 빌드
+# 실행중인 insight container 삭제
+log "insight container remove."
+docker rm -f insight
+
+# 기존 insight 이미지를 삭제하고 새로 빌드
 log "insight image remove and build."
 docker rmi insight:latest || true
 docker build -t insight:latest .
@@ -43,23 +47,23 @@ https://vault.nansan.site/v1/auth/approle/login)
 CLIENT_TOKEN=$(echo "$TOKEN_RESPONSES" | jq -r '.auth.client_token')
 
 SECRET_RESPONSE=$(curl -s --header "X-Vault-Token: ${CLIENT_TOKEN}" \
---request GET https://vault.nansan.site/v1/kv/data/auth)
+--request GET https://vault.nansan.site/v1/kv/data/authentication)
 
 REDISINSIGHT_USER=$(echo "$SECRET_RESPONSE" | jq -r '.data.data.insight.username')
 REDISINSIGHT_PASSWORD=$(echo "$SECRET_RESPONSE" | jq -r '.data.data.insight.password')
 RI_ENCRYPTION_KEY=$(echo "$SECRET_RESPONSE" | jq -r '.data.data.insight.key')
 
 # Docker로 insight 서비스 실행
-log "Execute insight..."
+log "Execute insight..."두
 docker run -d \
   --name insight \
   --restart unless-stopped \
+  -v /var/insight:/data \
   -p 8084:5540 \
   -e REDISINSIGHT_AUTH=true \
   -e REDISINSIGHT_USER=${REDISINSIGHT_USER} \
   -e REDISINSIGHT_PASSWORD=${REDISINSIGHT_PASSWORD} \
   -e RI_ENCRYPTION_KEY=${RI_ENCRYPTION_KEY} \
-  -v /var/insight:/data \
   --network nansan-network \
   insight:latest
 
