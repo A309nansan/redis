@@ -26,8 +26,6 @@ log "Docker network named 'nansan-network' is creating..."
 docker network create --driver bridge nansan-network
 fi
 
-cd insight || { echo "디렉토리 변경 실패"; exit 1; }
-
 # 실행중인 insight container 삭제
 log "insight container remove."
 docker rm -f insight
@@ -59,7 +57,7 @@ docker run -d \
   --name insight \
   --restart unless-stopped \
   -v /var/insight:/data \
-  -p 8084:5540 \
+  -p 11200:5540 \
   -e REDISINSIGHT_AUTH=true \
   -e REDISINSIGHT_USER=${REDISINSIGHT_USER} \
   -e REDISINSIGHT_PASSWORD=${REDISINSIGHT_PASSWORD} \

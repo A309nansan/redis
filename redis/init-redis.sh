@@ -26,8 +26,6 @@ log "Docker network named 'nansan-network' is creating..."
 docker network create --driver bridge nansan-network
 fi
 
-cd redis || { echo "디렉토리 변경 실패"; exit 1; }
-
 # 실행중인 redis container 삭제
 log "redis container remove."
 docker rm -f redis
@@ -57,6 +55,7 @@ docker run -d \
   --name redis \
   --restart unless-stopped \
   -v /var/redis:/data \
+  -p 11201:6379
   -e REDIS_ARGS="--requirepass ${REDIS_PASSWORD}" \
   -e REDISEARCH_ARGS="MAXEXPANSIONS 200" \
   -e REDISJSON_ARGS="DEBUG MEMORY" \
