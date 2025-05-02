@@ -55,7 +55,7 @@ docker run -d \
   --name redis \
   --restart unless-stopped \
   -v /var/redis:/data \
-  -p 11201:6379
+  -p 11201:6379 \
   -e REDIS_ARGS="--requirepass ${REDIS_PASSWORD}" \
   -e REDISEARCH_ARGS="MAXEXPANSIONS 200" \
   -e REDISJSON_ARGS="DEBUG MEMORY" \
